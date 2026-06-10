@@ -2,6 +2,20 @@ const getTransporter = require("../config/mail.js");
 
 const fromEmail = process.env.FROM_EMAIL || "marison399@gmail.com";
 
+const sendMailSafe = async (mailOptions) => {
+  if (!process.env.SMTP_HOST || !process.env.SMTP_USER) {
+    const error = new Error("Failed to send email. SMTP variables are missing on the server.");
+    error.statusCode = 503;
+    throw error;
+  }
+  try {
+    await getTransporter().sendMail(mailOptions);
+  } catch (err) {
+    const error = new Error(`Email delivery failed: ${err.message}`);
+    error.statusCode = 503;
+    throw error;
+  }
+};
 /**
  * Send OTP verification email to user.
  */
@@ -28,7 +42,7 @@ const sendOTPEmail = async (toEmail, userName, otp) => {
     `,
   };
 
-  await getTransporter().sendMail(mailOptions);
+  await sendMailSafe(mailOptions);
 };
 
 /**
@@ -85,7 +99,7 @@ const sendBookingConfirmation = async (toEmail, userName, bookingDetails) => {
     `,
   };
 
-  await getTransporter().sendMail(mailOptions);
+  await sendMailSafe(mailOptions);
 };
 
 /**
@@ -114,7 +128,7 @@ const sendPasswordResetEmail = async (toEmail, userName, otp) => {
     `,
   };
 
-  await getTransporter().sendMail(mailOptions);
+  await sendMailSafe(mailOptions);
 };
 
 /**
@@ -144,7 +158,7 @@ const sendOrganizerInvitation = async (toEmail, userName, invitationLink) => {
     `,
   };
 
-  await getTransporter().sendMail(mailOptions);
+  await sendMailSafe(mailOptions);
 };
 
 module.exports = {
