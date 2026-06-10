@@ -35,7 +35,8 @@ const createOrganizer = async ({ name, email }) => {
   await organizer.save();
 
   // Send invitation link
-  const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+  const rawClientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+  const clientUrl = rawClientUrl.endsWith("/") ? rawClientUrl.slice(0, -1) : rawClientUrl;
   const invitationLink = `${clientUrl}/reset-password?token=${invitationToken}&email=${encodeURIComponent(organizer.email)}`;
 
   let emailSent = false;
