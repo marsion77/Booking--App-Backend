@@ -40,14 +40,17 @@ const createOrganizer = async ({ name, email }) => {
   const invitationLink = `${clientUrl}/reset-password?token=${invitationToken}&email=${encodeURIComponent(organizer.email)}`;
 
   let emailSent = false;
+  let emailError = null;
   try {
     if (process.env.SMTP_HOST && process.env.SMTP_USER) {
       await emailService.sendOrganizerInvitation(organizer.email, organizer.name, invitationLink);
       emailSent = true;
     } else {
+      emailError = "SMTP variables are missing on the Render backend.";
       console.warn("SMTP configuration is missing on the server. Skipping email sending.");
     }
   } catch (error) {
+    emailError = error.message;
     console.error("Failed to send organizer invitation email:", error.message);
   }
 
@@ -59,6 +62,7 @@ const createOrganizer = async ({ name, email }) => {
     isVerified: organizer.isVerified,
     createdAt: organizer.createdAt,
     emailSent,
+    emailError,
     invitationLink,
   };
 };
