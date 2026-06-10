@@ -38,7 +38,13 @@ const createOrganizer = async ({ name, email }) => {
   const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
   const invitationLink = `${clientUrl}/reset-password?token=${invitationToken}&email=${encodeURIComponent(organizer.email)}`;
 
-  await emailService.sendOrganizerInvitation(organizer.email, organizer.name, invitationLink);
+  let emailSent = false;
+  try {
+    await emailService.sendOrganizerInvitation(organizer.email, organizer.name, invitationLink);
+    emailSent = true;
+  } catch (error) {
+    console.error("Failed to send organizer invitation email:", error.message);
+  }
 
   return {
     id: organizer._id,
@@ -47,6 +53,8 @@ const createOrganizer = async ({ name, email }) => {
     role: organizer.role,
     isVerified: organizer.isVerified,
     createdAt: organizer.createdAt,
+    emailSent,
+    invitationLink,
   };
 };
 
