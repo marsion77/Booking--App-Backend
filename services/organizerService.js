@@ -41,8 +41,12 @@ const createOrganizer = async ({ name, email }) => {
 
   let emailSent = false;
   try {
-    await emailService.sendOrganizerInvitation(organizer.email, organizer.name, invitationLink);
-    emailSent = true;
+    if (process.env.SMTP_HOST && process.env.SMTP_USER) {
+      await emailService.sendOrganizerInvitation(organizer.email, organizer.name, invitationLink);
+      emailSent = true;
+    } else {
+      console.warn("SMTP configuration is missing on the server. Skipping email sending.");
+    }
   } catch (error) {
     console.error("Failed to send organizer invitation email:", error.message);
   }
